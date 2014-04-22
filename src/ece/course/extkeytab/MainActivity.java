@@ -6,7 +6,9 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
@@ -23,12 +25,14 @@ public class MainActivity extends Activity {
 	BluetoothAdapter mAdapter = null;
 	BluetoothSocket socket = null;
 	TextView tvStatus;
+	EditText etText;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		tvStatus = (TextView) findViewById(R.id.tvStatus);
 		tvStatus.setText("Disconnected");
+		etText = (EditText) findViewById(R.id.etText);
 		
 		mAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mAdapter == null)
@@ -103,7 +107,23 @@ public class MainActivity extends Activity {
 	    }
 	    
 	    public void run(){
-
+	    	byte[] buffer = new byte[1024];
+	    	int bytes;
+	    	
+	    	while (true){
+	    		try{
+	    			bytes = mmInStream.read(buffer);
+	    		} catch (IOException e){
+	    			Toast.makeText(MainActivity.this, "IO Error", Toast.LENGTH_LONG).show();
+	    			break;
+	    		}
+	    		if (bytes == -1)
+	    			continue;
+	    		if (bytes == 1){
+	    			etText.append((CharSequence) new String(buffer));
+	    		}
+	    		//TODO: Handle disconnect request
+	    	}
 	    }
 	}
 	
