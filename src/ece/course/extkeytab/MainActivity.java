@@ -121,6 +121,7 @@ public class MainActivity extends Activity {
 	    			continue;
 	    		else{
 	    			runOnUiThread(new Runnable() {
+	    				@Override
 	    			     public void run() {
 	    			    	 etText.append((CharSequence) new String(buffer));
 	    			    }
