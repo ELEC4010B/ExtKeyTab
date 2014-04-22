@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +28,14 @@ public class MainActivity extends Activity {
 	BluetoothSocket socket = null;
 	TextView tvStatus;
 	public EditText etText;
+	final byte[] buffer = new byte[1024];
+	Handler mHandler = new Handler() {
+		@Override  
+        public void handleMessage(Message msg) {  
+			etText.append((CharSequence) new String(buffer));
+            super.handleMessage(msg);  
+        }
+	};
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -107,7 +117,6 @@ public class MainActivity extends Activity {
 	    }
 	    
 	    public void run(){
-	    	final byte[] buffer = new byte[1024];
 	    	int bytes;
 	    	
 	    	while (true){
@@ -119,12 +128,9 @@ public class MainActivity extends Activity {
 	    		}
 	    		if (bytes == -1)
 	    			continue;
-	    		else{
-	    			runOnUiThread(new Runnable() {
-	    			     public void run() {
-	    			    	 etText.append((CharSequence) new String(buffer));
-	    			    }
-	    			});
+	    		else {
+	    			Message msg = mHandler.obtainMessage();
+	    			msg.sendToTarget();
 	    		}
 	    		//TODO: Handle disconnect request
 	    	}
