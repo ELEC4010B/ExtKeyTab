@@ -26,5 +26,6 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:gravity="top"
+        android:inputType="textNoSuggestions|textMultiLine"
         android:hint="Text" />
 </LinearLayout>

@@ -28,15 +28,7 @@ public class MainActivity extends Activity {
 	BluetoothSocket socket = null;
 	TextView tvStatus;
 	public EditText etText;
-	final byte[] buffer = new byte[1024];
-	Handler mHandler = new Handler() {
-		@Override  
-        public void handleMessage(Message msg) {  
-			etText.append((CharSequence) new String(buffer));
-            super.handleMessage(msg);  
-        }
-	};
-
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
@@ -97,7 +89,11 @@ public class MainActivity extends Activity {
 	            }
 	        }
 	        //Code for handling data flow after receiving BluetoothSocket socket
-	        tvStatus.setText("Connected");
+	        runOnUiThread(new Runnable() {
+	            public void run() {
+	            	tvStatus.setText("Connected");
+	           }
+	       });
 	        (new ConnectedThread()).start();
 	    }
 	}
@@ -118,6 +114,7 @@ public class MainActivity extends Activity {
 	    
 	    public void run(){
 	    	int bytes;
+	    	final byte[] buffer = new byte[1024];
 	    	
 	    	while (true){
 	    		try{
@@ -130,8 +127,12 @@ public class MainActivity extends Activity {
 	    			continue;
 
 	    		else {
-	    			Message msg = mHandler.obtainMessage();
-	    			msg.sendToTarget();
+	    			runOnUiThread(new Runnable() {
+	    			     @Override
+	    			     public void run() {
+	    			    	 etText.append((CharSequence) new String(buffer));
+	    			    }
+	    			});
 	    		}
 	    		//TODO: Handle disconnect request
 	    	}
