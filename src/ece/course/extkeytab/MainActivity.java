@@ -25,7 +25,7 @@ public class MainActivity extends Activity {
 	BluetoothAdapter mAdapter = null;
 	BluetoothSocket socket = null;
 	TextView tvStatus;
-	EditText etText;
+	public EditText etText;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -107,20 +107,24 @@ public class MainActivity extends Activity {
 	    }
 	    
 	    public void run(){
-	    	byte[] buffer = new byte[1024];
+	    	final byte[] buffer = new byte[1024];
 	    	int bytes;
 	    	
 	    	while (true){
 	    		try{
 	    			bytes = mmInStream.read(buffer);
 	    		} catch (IOException e){
-	    			Toast.makeText(MainActivity.this, "IO Error", Toast.LENGTH_LONG).show();
+//	    			Toast.makeText(MainActivity.this, "IO Error", Toast.LENGTH_LONG).show();
 	    			break;
 	    		}
 	    		if (bytes == -1)
 	    			continue;
-	    		if (bytes == 1){
-	    			etText.append((CharSequence) new String(buffer));
+	    		else{
+	    			runOnUiThread(new Runnable() {
+	    			     public void run() {
+	    			    	 etText.append((CharSequence) new String(buffer));
+	    			    }
+	    			});
 	    		}
 	    		//TODO: Handle disconnect request
 	    	}
