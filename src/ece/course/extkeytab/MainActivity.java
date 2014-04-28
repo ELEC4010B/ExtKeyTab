@@ -34,8 +34,9 @@ public class MainActivity extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			String s = etText.getText().toString();
-			s = s + (String) msg.obj;
+			s = s + (String)msg.obj;
 			etText.setText(s);
+			etText.setSelection(s.length());
 			super.handleMessage(msg);
 		}
 	};
