@@ -30,16 +30,6 @@ public class MainActivity extends Activity {
 	BluetoothSocket socket = null;
 	TextView tvStatus;
 	public EditText etText;
-	private Handler mHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			String s = etText.getText().toString();
-			s = s + (String)msg.obj;
-			etText.setText(s);
-			etText.setSelection(s.length());
-			super.handleMessage(msg);
-		}
-	};
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -155,8 +145,10 @@ public class MainActivity extends Activity {
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							mHandler.obtainMessage(0, new String(buffer))
-									.sendToTarget();
+							String s = etText.getText().toString();
+							s = s + (buffer[0] - '0');
+							etText.setText(s);
+							etText.setSelection(s.length());
 						}
 					});
 				}
