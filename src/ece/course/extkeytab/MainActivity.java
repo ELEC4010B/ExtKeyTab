@@ -146,9 +146,15 @@ public class MainActivity extends Activity {
 						@Override
 						public void run() {
 							String s = etText.getText().toString();
-							s = s + (buffer[0] - '0');
-							etText.setText(s);
-							etText.setSelection(s.length());
+							if ((buffer[0] != 'L') && (buffer[0] != 'R')) {
+								s = s + (buffer[0] - '0');
+								etText.setText(s);
+								etText.setSelection(s.length());
+							} else if (buffer[0] == 'L') {
+								etText.setSelection(s.length() - 1);
+							} else if (buffer[0] == 'R') {
+								etText.setSelection(s.length() + 1);
+							}
 						}
 					});
 				}
