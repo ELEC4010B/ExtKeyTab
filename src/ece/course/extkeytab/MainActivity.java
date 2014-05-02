@@ -146,7 +146,8 @@ public class MainActivity extends Activity {
 						@Override
 						public void run() {
 							String s = etText.getText().toString();
-							if ((buffer[0] != 'L') && (buffer[0] != 'R')) {
+							if ((buffer[0] != 'L') && (buffer[0] != 'R')
+									&& (buffer[0] != 'U') && (buffer[0] != 'D')) {
 								s = s + (buffer[0] - '0');
 								etText.setText(s);
 								etText.setSelection(s.length());
@@ -154,6 +155,10 @@ public class MainActivity extends Activity {
 								etText.setSelection(s.length() - 1);
 							} else if (buffer[0] == 'R') {
 								etText.setSelection(s.length() + 1);
+							} else if (buffer[0] == 'U') {
+								etText.setSelection(s.length() - 36);
+							} else if (buffer[0] == 'D') {
+								etText.setSelection(s.length() + 36);
 							}
 						}
 					});
