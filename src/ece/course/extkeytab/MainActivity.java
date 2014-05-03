@@ -1,21 +1,25 @@
 package ece.course.extkeytab;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.UUID;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.Environment;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 public class MainActivity extends Activity {
@@ -30,6 +34,7 @@ public class MainActivity extends Activity {
 	BluetoothSocket socket = null;
 	TextView tvStatus;
 	public EditText etText;
+	Button btnSave;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -37,23 +42,76 @@ public class MainActivity extends Activity {
 		tvStatus = (TextView) findViewById(R.id.tvStatus);
 		tvStatus.setText("Disconnected");
 		etText = (EditText) findViewById(R.id.etText);
+		btnSave = (Button) findViewById(R.id.btnSave);
+
+		btnSave.setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				AlertDialog.Builder alert = new AlertDialog.Builder(view
+						.getContext());
+
+				alert.setTitle("Please input file name");
+
+				// Set an EditText view to get user input
+				final EditText input = new EditText(view.getContext());
+				alert.setView(input);
+
+				alert.setPositiveButton("OK",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								String filename = input.getText().toString();
+								try {
+									File root = new File(Environment
+											.getExternalStorageDirectory(),
+											"Extended Keyboard");
+									if (!root.exists()) {
+										root.mkdirs();
+									}
+									File gpxfile = new File(root, filename);
+									FileWriter writer = new FileWriter(gpxfile);
+									writer.append(etText.getText().toString());
+									writer.flush();
+									writer.close();
+									Toast.makeText(getBaseContext(), "Saved",
+											Toast.LENGTH_SHORT).show();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							}
+						});
+
+				alert.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								// Canceled.
+							}
+						});
+
+				alert.show();
+			}
+		});
 
 		mAdapter = BluetoothAdapter.getDefaultAdapter();
-		if (mAdapter == null)
+		if (mAdapter == null) {
+			Toast.makeText(MainActivity.this, "No Bluetooth adapter found",
+					Toast.LENGTH_LONG).show();
 			finish();
-		// Makes the device discoverable
-		if (mAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE
-				|| !mAdapter.isEnabled()) {
-			Intent discoverableIntent = new Intent(
-					BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-			discoverableIntent.putExtra(
-					BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
-					DISCOVER_DURATION);
-			startActivityForResult(discoverableIntent, REQUEST_ENABLE_BT);
-		}
+		} else {
+			// Makes the device discoverable
+			if (mAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE
+					|| !mAdapter.isEnabled()) {
+				Intent discoverableIntent = new Intent(
+						BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+				discoverableIntent.putExtra(
+						BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
+						DISCOVER_DURATION);
+				startActivityForResult(discoverableIntent, REQUEST_ENABLE_BT);
+			}
 
-		if (mAdapter.getScanMode() == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE)
-			(new AcceptThread()).start();
+			if (mAdapter.getScanMode() == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE)
+				(new AcceptThread()).start();
+		}
 
 	}
 
@@ -112,18 +170,14 @@ public class MainActivity extends Activity {
 
 	private class ConnectedThread extends Thread {
 		private final InputStream mmInStream;
-		private final OutputStream mmOutStream;
 
 		public ConnectedThread() {
 			InputStream tmpIn = null;
-			OutputStream tmpOut = null;
 			try {
 				tmpIn = socket.getInputStream();
-				tmpOut = socket.getOutputStream();
 			} catch (IOException e) {
 			}
 			mmInStream = tmpIn;
-			mmOutStream = tmpOut;
 		}
 
 		public void run() {
@@ -152,13 +206,25 @@ public class MainActivity extends Activity {
 								etText.setText(s);
 								etText.setSelection(s.length());
 							} else if (buffer[0] == 'L') {
-								etText.setSelection(s.length() - 1);
+								if (etText.getSelectionEnd() - 1 >= 0)
+									etText.setSelection(etText
+											.getSelectionEnd() - 1);
 							} else if (buffer[0] == 'R') {
-								etText.setSelection(s.length() + 1);
+								if (etText.getSelectionEnd() + 1 <= s.length())
+									etText.setSelection(etText
+											.getSelectionEnd() + 1);
 							} else if (buffer[0] == 'U') {
-								etText.setSelection(s.length() - 36);
+								if (etText.getSelectionEnd() - 36 >= 0)
+									etText.setSelection(etText
+											.getSelectionEnd() - 36);
+								else
+									etText.setSelection(0);
 							} else if (buffer[0] == 'D') {
-								etText.setSelection(s.length() + 36);
+								if (etText.getSelectionEnd() + 36 <= s.length())
+									etText.setSelection(etText
+											.getSelectionEnd() + 36);
+								else
+									etText.setSelection(s.length());
 							}
 						}
 					});
