@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
 import android.view.View;
@@ -208,27 +209,53 @@ public class MainActivity extends Activity {
 								etText.setText(s);
 								etText.setSelection(s.length());
 							} else {
-								Spannable etSpan = null;
-								etSpan.setSpan(etText, 0, s.length(), 256);
 								if (buffer[0] == 'L') {
-									Selection.moveLeft(etSpan,
-											etText.getLayout());
-									// if (etText.getSelectionEnd() - 1 >= 0)
-									// etText.setSelection(etText
-									// .getSelectionEnd() - 1);
+									if (etText.getSelectionEnd() - 1 >= 0)
+										etText.setSelection(etText
+												.getSelectionEnd() - 1);
 								} else if (buffer[0] == 'R') {
-									Selection.moveRight(etSpan,
-											etText.getLayout());
-									// if (etText.getSelectionEnd() + 1 <=
-									// s.length())
-									// etText.setSelection(etText
-									// .getSelectionEnd() + 1);
+									if (etText.getSelectionEnd() + 1 <= s
+											.length())
+										etText.setSelection(etText
+												.getSelectionEnd() + 1);
 								} else if (buffer[0] == 'U') {
-									Selection
-											.moveUp(etSpan, etText.getLayout());
+									int end = etText.getSelectionEnd();
+									Layout layout = etText.getLayout();
+									int line = layout.getLineForOffset(end);
+									if (line > 0) {
+										int move;
+										if (layout.getParagraphDirection(line) == layout
+												.getParagraphDirection(line - 1)) {
+											float h = layout
+													.getPrimaryHorizontal(end);
+											move = layout
+													.getOffsetForHorizontal(
+															line - 1, h);
+										} else {
+											move = layout
+													.getLineStart(line - 1);
+										}
+										etText.setSelection(move);
+									}
 								} else if (buffer[0] == 'D') {
-									Selection.moveDown(etSpan,
-											etText.getLayout());
+									int end = etText.getSelectionEnd();
+									Layout layout = etText.getLayout();
+									int line = layout.getLineForOffset(end);
+									if (line < layout.getLineCount() - 1) {
+										int move;
+										if (layout.getParagraphDirection(line) == layout
+												.getParagraphDirection(line + 1)) {
+											float h = layout
+													.getPrimaryHorizontal(end);
+											move = layout
+													.getOffsetForHorizontal(
+															line + 1, h);
+										} else {
+											move = layout
+													.getLineStart(line + 1);
+										}
+										etText.setSelection(move);
+									}
 								}
 							}
 						}
