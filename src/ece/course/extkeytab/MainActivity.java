@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Selection;
+import android.text.Spannable;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -206,21 +208,27 @@ public class MainActivity extends Activity {
 								etText.setText(s);
 								etText.setSelection(s.length());
 							} else if (buffer[0] == 'L') {
-								if (etText.getSelectionEnd() - 1 >= 0)
-									etText.setSelection(etText
-											.getSelectionEnd() - 1);
+								Spannable etSpan = null;
+								etSpan.setSpan(etText, 0, s.length(), 256);
+								Selection.moveLeft(etSpan,etText.getLayout());
+//								if (etText.getSelectionEnd() - 1 >= 0)
+//									etText.setSelection(etText
+//											.getSelectionEnd() - 1);
 							} else if (buffer[0] == 'R') {
-								if (etText.getSelectionEnd() + 1 <= s.length())
-									etText.setSelection(etText
-											.getSelectionEnd() + 1);
+								Spannable etSpan = null;
+								etSpan.setSpan(etText, 0, s.length(), 256);
+								Selection.moveRight(etSpan,etText.getLayout());
+//								if (etText.getSelectionEnd() + 1 <= s.length())
+//									etText.setSelection(etText
+//											.getSelectionEnd() + 1);
 							} else if (buffer[0] == 'U') {
-								if (etText.getSelectionEnd() - 36 >= 0)
-									etText.setSelection(etText
-											.getSelectionEnd() - 36);
+								Spannable etSpan = null;
+								etSpan.setSpan(etText, 0, s.length(), 256);
+								Selection.moveUp(etSpan,etText.getLayout());
 							} else if (buffer[0] == 'D') {
-								if (etText.getSelectionEnd() + 36 <= s.length())
-									etText.setSelection(etText
-											.getSelectionEnd() + 36);
+								Spannable etSpan = null;
+								etSpan.setSpan(etText, 0, s.length(), 256);
+								Selection.moveDown(etSpan,etText.getLayout());
 							}
 						}
 					});
