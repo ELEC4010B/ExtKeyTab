@@ -208,7 +208,8 @@ public class MainActivity extends Activity {
 								s = s + (char) buffer[0];
 								etText.setText(s);
 								etText.setSelection(s.length());
-							} else {
+							} else if ((buffer[0] != 'L') || (buffer[0] != 'R')
+									|| (buffer[0] != 'U') || (buffer[0] != 'D')) {
 								if (buffer[0] == 'L') {
 									if (etText.getSelectionEnd() - 1 >= 0)
 										etText.setSelection(etText
