@@ -204,31 +204,32 @@ public class MainActivity extends Activity {
 							String s = etText.getText().toString();
 							if ((buffer[0] != 'L') && (buffer[0] != 'R')
 									&& (buffer[0] != 'U') && (buffer[0] != 'D')) {
-								s = s + (char)buffer[0];
+								s = s + (char) buffer[0];
 								etText.setText(s);
 								etText.setSelection(s.length());
-							} else if (buffer[0] == 'L') {
+							} else {
 								Spannable etSpan = null;
 								etSpan.setSpan(etText, 0, s.length(), 256);
-								Selection.moveLeft(etSpan,etText.getLayout());
-//								if (etText.getSelectionEnd() - 1 >= 0)
-//									etText.setSelection(etText
-//											.getSelectionEnd() - 1);
-							} else if (buffer[0] == 'R') {
-								Spannable etSpan = null;
-								etSpan.setSpan(etText, 0, s.length(), 256);
-								Selection.moveRight(etSpan,etText.getLayout());
-//								if (etText.getSelectionEnd() + 1 <= s.length())
-//									etText.setSelection(etText
-//											.getSelectionEnd() + 1);
-							} else if (buffer[0] == 'U') {
-								Spannable etSpan = null;
-								etSpan.setSpan(etText, 0, s.length(), 256);
-								Selection.moveUp(etSpan,etText.getLayout());
-							} else if (buffer[0] == 'D') {
-								Spannable etSpan = null;
-								etSpan.setSpan(etText, 0, s.length(), 256);
-								Selection.moveDown(etSpan,etText.getLayout());
+								if (buffer[0] == 'L') {
+									Selection.moveLeft(etSpan,
+											etText.getLayout());
+									// if (etText.getSelectionEnd() - 1 >= 0)
+									// etText.setSelection(etText
+									// .getSelectionEnd() - 1);
+								} else if (buffer[0] == 'R') {
+									Selection.moveRight(etSpan,
+											etText.getLayout());
+									// if (etText.getSelectionEnd() + 1 <=
+									// s.length())
+									// etText.setSelection(etText
+									// .getSelectionEnd() + 1);
+								} else if (buffer[0] == 'U') {
+									Selection
+											.moveUp(etSpan, etText.getLayout());
+								} else if (buffer[0] == 'D') {
+									Selection.moveDown(etSpan,
+											etText.getLayout());
+								}
 							}
 						}
 					});
