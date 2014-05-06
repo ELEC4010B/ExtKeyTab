@@ -202,7 +202,7 @@ public class MainActivity extends Activity {
 							String s = etText.getText().toString();
 							if ((buffer[0] != 'L') && (buffer[0] != 'R')
 									&& (buffer[0] != 'U') && (buffer[0] != 'D')) {
-								s = s + Byte.toString(buffer[0]);
+								s = s + new String(buffer);
 								etText.setText(s);
 								etText.setSelection(s.length());
 							} else if (buffer[0] == 'L') {
