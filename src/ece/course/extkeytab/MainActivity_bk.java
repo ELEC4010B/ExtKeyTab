@@ -13,7 +13,6 @@ import android.os.PowerManager.WakeLock;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -28,19 +27,12 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 
-public class MainActivity extends Activity {
-	final char UP = 'U';
-	final char DOWN = 'D';
-	final char LEFT = 'L';
-	final char RIGHT = 'R';
-	final char S_LEFT = 'N';
-	final char S_RIGHT = 'M';
-	final char DISCONNECT = 'Q';
+public class MainActivity_bk extends Activity {
 	private PowerManager mPowerManager;
 	private WakeLock mWakeLock;
 	final int REQUEST_ENABLE_BT = 100;
 	final int DISCOVER_DURATION = 0;
-	final int RESULT_CODE = 0;
+	int RESULT_CODE = 0;
 	Intent ResultData;
 	final String NAME = "ExtKeyTab";
 	final UUID MY_UUID = UUID
@@ -113,7 +105,7 @@ public class MainActivity extends Activity {
 
 		mAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mAdapter == null) {
-			Toast.makeText(MainActivity.this, "No Bluetooth adapter found",
+			Toast.makeText(MainActivity_bk.this, "No Bluetooth adapter found",
 					Toast.LENGTH_LONG).show();
 			finish();
 		} else {
@@ -218,27 +210,20 @@ public class MainActivity extends Activity {
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							int end;
-							Layout layout;
-							int line;
 							String s = etText.getText().toString();
-							Log.i("TABLET", Character.toString((char)buffer[0]));
-							switch (buffer[0]){
-							case LEFT:
+							if (buffer[0] == 'L') {
 								if (etText.getSelectionEnd() - 1 >= 0)
 									etText.setSelection(etText
 											.getSelectionEnd() - 1);
-								break;
-							case RIGHT:
+							} else if (buffer[0] == 'R') {
 								if (etText.getSelectionEnd() + 1 <= s
-								.length())
+										.length())
 									etText.setSelection(etText
 											.getSelectionEnd() + 1);
-								break;
-							case UP:
-								end = etText.getSelectionEnd();
-								layout = etText.getLayout();
-								line = layout.getLineForOffset(end);
+							} else if (buffer[0] == 'U') {
+								int end = etText.getSelectionEnd();
+								Layout layout = etText.getLayout();
+								int line = layout.getLineForOffset(end);
 								if (line > 0) {
 									int move;
 									if (layout.getParagraphDirection(line) == layout
@@ -254,11 +239,10 @@ public class MainActivity extends Activity {
 									}
 									etText.setSelection(move);
 								}
-								break;
-							case DOWN:
-								end = etText.getSelectionEnd();
-								layout = etText.getLayout();
-								line = layout.getLineForOffset(end);
+							} else if (buffer[0] == 'D') {
+								int end = etText.getSelectionEnd();
+								Layout layout = etText.getLayout();
+								int line = layout.getLineForOffset(end);
 								if (line < layout.getLineCount() - 1) {
 									int move;
 									if (layout.getParagraphDirection(line) == layout
@@ -274,31 +258,17 @@ public class MainActivity extends Activity {
 									}
 									etText.setSelection(move);
 								}
-								break;
-							case 'N':
-								Log.i("TABLET", "Move Selection Left");
-								if (etText.getSelectionStart() - 1 >= 0)
-									etText.setSelection(etText
-											.getSelectionStart() - 1, etText.getSelectionEnd());
-								
-								break;
-							case 'M':
-								Log.i("TABLET", "Move Selection Right");
-								if (etText.getSelectionEnd() + 1 <= s
-										.length())
-									etText.setSelection(etText.getSelectionStart(), 
-											etText.getSelectionEnd() + 1);								
-								break;
-							case DISCONNECT:
+							}
+							// TODO: Handle disconnect request
+							else if (buffer[0] == 'Q'){
 								tvStatus.setText("Disconnected");
 								(new AcceptThread()).start();
-								break;
-							default:
-								end = etText.getSelectionEnd();
+							}
+							else {
+								int end = etText.getSelectionEnd();
 								s = s.substring(0, end) + (char) buffer[0] + s.substring(end, s.length());
 								etText.setText(s);
 								etText.setSelection(end + 1);
-								break;
 							}
 						}
 					});
