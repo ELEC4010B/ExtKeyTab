@@ -5,15 +5,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
-
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.text.Layout;
-import android.text.Selection;
-import android.text.Spannable;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+/***************** REMEMBER TO CHANGE MANIFEST *************/
 public class MainActivity extends Activity {
 	final char UP = 'U';
 	final char DOWN = 'D';
@@ -36,6 +37,8 @@ public class MainActivity extends Activity {
 	final char S_LEFT = 'N';
 	final char S_RIGHT = 'M';
 	final char DISCONNECT = 'Q';
+	final char S_END = 'P';
+	final char END = 'O';
 	private PowerManager mPowerManager;
 	private WakeLock mWakeLock;
 	final int REQUEST_ENABLE_BT = 100;
@@ -50,6 +53,8 @@ public class MainActivity extends Activity {
 	TextView tvStatus;
 	public EditText etText;
 	Button btnSave;
+	String clip;
+	
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -189,8 +194,10 @@ public class MainActivity extends Activity {
 
 	private class ConnectedThread extends Thread {
 		private final InputStream mmInStream;
+		boolean movingLeft;
 
 		public ConnectedThread() {
+			movingLeft = false;
 			InputStream tmpIn = null;
 			try {
 				tmpIn = socket.getInputStream();
@@ -211,6 +218,7 @@ public class MainActivity extends Activity {
 					// Toast.LENGTH_LONG).show();
 					break;
 				}
+				Log.w("TABLET", "Received" + Character.toString((char)buffer[0]));
 				if (bytes == -1)
 					continue;
 
@@ -222,7 +230,6 @@ public class MainActivity extends Activity {
 							Layout layout;
 							int line;
 							String s = etText.getText().toString();
-							Log.i("TABLET", Character.toString((char)buffer[0]));
 							switch (buffer[0]){
 							case LEFT:
 								if (etText.getSelectionEnd() - 1 >= 0)
@@ -275,19 +282,28 @@ public class MainActivity extends Activity {
 									etText.setSelection(move);
 								}
 								break;
-							case 'N':
-								Log.i("TABLET", "Move Selection Left");
-								if (etText.getSelectionStart() - 1 >= 0)
+							case S_LEFT:
+								if (etText.getSelectionStart() == etText.getSelectionEnd())
+									movingLeft = true;
+								if (etText.getSelectionStart() - 1 >= 0 && movingLeft)
 									etText.setSelection(etText
 											.getSelectionStart() - 1, etText.getSelectionEnd());
 								
+								else if (etText.getSelectionStart() < etText.getSelectionEnd())
+									etText.setSelection(etText.getSelectionStart(), etText.getSelectionEnd()-1);
 								break;
-							case 'M':
-								Log.i("TABLET", "Move Selection Right");
-								if (etText.getSelectionEnd() + 1 <= s
-										.length())
+							case S_RIGHT:
+								if (etText.getSelectionStart() == etText.getSelectionEnd())
+									movingLeft = false;
+								if (etText.getSelectionEnd() + 1 <= s.length() && !movingLeft)
 									etText.setSelection(etText.getSelectionStart(), 
-											etText.getSelectionEnd() + 1);								
+											etText.getSelectionEnd() + 1);
+								else if (etText.getSelectionStart() < etText.getSelectionEnd())
+									etText.setSelection(etText.getSelectionStart()+1, etText.getSelectionEnd());
+								break;
+							case S_END:
+							case END:
+								openOptionsMenu();
 								break;
 							case DISCONNECT:
 								tvStatus.setText("Disconnected");
@@ -306,6 +322,49 @@ public class MainActivity extends Activity {
 			}
 		}
 	}
+	
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.actionbar, menu);
+	    return true;
+	}
+	
+	public boolean onOptionsItemSelected(MenuItem item) {
+		String s;
+		int begin;
+		int end;
+
+		switch (item.getItemId()) {
+	        case R.id.copy:
+	        	begin = etText.getSelectionStart();
+	        	end = etText.getSelectionEnd();
+	        	s = etText.getText().toString();
+	        	clip = etText.getText().toString().substring(begin, end);
+	            return true;
+	        case R.id.cut:
+	        	begin = etText.getSelectionStart();
+	        	end = etText.getSelectionEnd();
+	        	s = etText.getText().toString();
+	        	clip = etText.getText().toString().substring(begin, end);
+	            s = s.substring(0, begin) + s.substring(end, s.length());
+	            etText.setText(s);
+				etText.setSelection(begin);
+	            return true;
+	        case R.id.paste:
+	        	begin = etText.getSelectionStart();
+	        	end = etText.getSelectionEnd();
+	            s = etText.getText().toString();
+	            s = s.substring(0, begin) + clip + s.substring(end, s.length());
+	            etText.setText(s);
+	            if (begin == end)
+	            	etText.setSelection(begin, begin+clip.length());
+	            else etText.setSelection(begin, end);
+	        	return true;
+	        default:
+	        	return true;
+	    }
+	}
+	
 	public synchronized void onResume() {
 		super.onResume();
 		mWakeLock.acquire();
