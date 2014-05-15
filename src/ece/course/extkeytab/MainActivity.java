@@ -67,6 +67,7 @@ public class MainActivity extends Activity {
 		tvStatus.setText("Disconnected");
 		etText = (EditText) findViewById(R.id.etText);
 		btnSave = (Button) findViewById(R.id.btnSave);
+		clip = null;
 
 		btnSave.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
@@ -353,14 +354,16 @@ public class MainActivity extends Activity {
 				etText.setSelection(begin);
 	            return true;
 	        case R.id.paste:
-	        	begin = etText.getSelectionStart();
-	        	end = etText.getSelectionEnd();
-	            s = etText.getText().toString();
-	            s = s.substring(0, begin) + clip + s.substring(end, s.length());
-	            etText.setText(s);
-	            if (begin == end)
-	            	etText.setSelection(begin, begin+clip.length());
-	            else etText.setSelection(begin, end);
+	        	if (clip != null){
+		        	begin = etText.getSelectionStart();
+		        	end = etText.getSelectionEnd();
+		            s = etText.getText().toString();
+		            s = s.substring(0, begin) + clip + s.substring(end, s.length());
+		            etText.setText(s);
+		            if (begin == end)
+		            	etText.setSelection(begin, begin+clip.length());
+		            else etText.setSelection(begin, end);
+	        	}
 	        	return true;
 	        default:
 	        	return true;
