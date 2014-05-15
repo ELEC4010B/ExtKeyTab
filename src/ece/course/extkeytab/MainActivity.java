@@ -302,8 +302,9 @@ public class MainActivity extends Activity {
 									etText.setSelection(etText.getSelectionStart()+1, etText.getSelectionEnd());
 								break;
 							case S_END:
-							case END:
 								openOptionsMenu();
+								break;
+							case END:
 								break;
 							case DISCONNECT:
 								tvStatus.setText("Disconnected");
