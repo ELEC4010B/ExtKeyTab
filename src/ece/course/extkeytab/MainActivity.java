@@ -305,6 +305,7 @@ public class MainActivity extends Activity {
 								openOptionsMenu();
 								break;
 							case END:
+								closeOptionsMenu();
 								break;
 							case DISCONNECT:
 								tvStatus.setText("Disconnected");
