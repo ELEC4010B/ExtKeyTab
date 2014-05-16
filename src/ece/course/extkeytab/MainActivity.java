@@ -123,8 +123,10 @@ public class MainActivity extends Activity {
 					Toast.LENGTH_LONG).show();
 			finish();
 		} else {
+			if (mAdapter.getScanMode() == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE)
+				(new AcceptThread()).start();
 			// Makes the device discoverable
-			if (mAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE
+			else if (mAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE
 					|| !mAdapter.isEnabled()) {
 				Intent discoverableIntent = new Intent(
 						BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
@@ -133,18 +135,18 @@ public class MainActivity extends Activity {
 						DISCOVER_DURATION);
 				startActivityForResult(discoverableIntent, REQUEST_ENABLE_BT);
 			}
-
-			if (mAdapter.getScanMode() == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE)
-				(new AcceptThread()).start();
 		}
-
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_ENABLE_BT)
+		if (requestCode == REQUEST_ENABLE_BT){
 			if (resultCode == RESULT_CANCELED
 					&& (!mAdapter.isEnabled() || mAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE))
 				finish();
+			else
+				(new AcceptThread()).start();
+
+		}
 	}
 
 	private class AcceptThread extends Thread {
@@ -162,6 +164,7 @@ public class MainActivity extends Activity {
 			} catch (IOException e) {
 			}
 			mmServerSocket = tmp;
+			Log.w("Bluetooth Server", "Server Socket Created");
 		}
 
 		public void run() {
@@ -171,12 +174,14 @@ public class MainActivity extends Activity {
 				try {
 					socket = mmServerSocket.accept();
 				} catch (IOException e) {
+					Log.e("Bluetooth Server", "Error Accepting Socket");
 					break;
 				}
 				// If a connection was accepted
 				if (socket != null) {
 					try {
 						mmServerSocket.close();
+						Log.w("Bluetooth Server", "Server Socket Closed");
 					} catch (IOException e) {
 					}
 					break;
